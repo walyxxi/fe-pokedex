@@ -37,7 +37,6 @@ export default function PokemonCard({
               className="w-36 h-36 object-contain"
               src={pokemonImgUrl || ""}
               alt={`${pokemonName} image`}
-              loading="eager"
             />
           </Suspense>
         </CardContent>

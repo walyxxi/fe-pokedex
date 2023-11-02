@@ -22,7 +22,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <QueryProvider>
           <Header />
-          {children}
+          <main className="min-h-screen pt-10">
+            <article className="container p-10">{children}</article>
+          </main>
           <Footer />
         </QueryProvider>
       </body>
