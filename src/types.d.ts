@@ -64,6 +64,7 @@ export interface PokemonType {
 export interface PokemonData {
   id: number;
   name: string;
+  nickname?: string;
   stats: PokemonStats[];
   abilities: PokemonAbility[];
   types: PokemonType[];

@@ -7,7 +7,7 @@ import Loading from "@/components/loading";
 import { useGetPokemon } from "@/hooks/use-pokeapi";
 import { getImageURL } from "@/lib/utils";
 
-export default function Page({ params }: { params: { slug: string } }) {
+export default function PokemonPage({ params }: { params: { slug: string } }) {
   const { data, isLoading, isError } = useGetPokemon(params.slug);
 
   if (isLoading) {
@@ -20,10 +20,12 @@ export default function Page({ params }: { params: { slug: string } }) {
 
   return (
     <>
-      <PokemonDetails
-        pokemonData={data}
-        pokemonImageURL={getImageURL(data.id)}
-      />
+      {data && (
+        <PokemonDetails
+          pokemonData={data}
+          pokemonImageURL={getImageURL(data.id)}
+        />
+      )}
       <div className="fixed bottom-0 flex flex-row gap-2 md:bottom-[-10] right-4 mb-4 mr-4">
         <Link href="/">
           <Button size={"lg"}>Back</Button>

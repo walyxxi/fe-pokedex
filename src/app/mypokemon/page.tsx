@@ -1,30 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useGetAllPokemonPage } from "@/hooks/use-pokeapi";
-import { getImageURL } from "@/lib/utils";
-import { usePaginationStore } from "@/store";
+import { useGetAllMyPokemon } from "@/hooks/use-api";
+import { usePaginationMyPokemonStore } from "@/store";
 import { PokemonData } from "@/types";
+import React, { useEffect, useState } from "react";
+import Loading from "@/components/loading";
+import PokemonCard from "@/components/pokemon/pokemon-card";
+import { getImageURL } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Loading from "../loading";
-import { Button } from "../ui/button";
-import PokemonCard from "./pokemon-card";
 
-export default function PokemonList() {
+const MyPokemonPage = () => {
   const { currentPage, itemsPerPage, updatePagePosition } =
-    usePaginationStore();
+    usePaginationMyPokemonStore();
 
   const {
     isLoading,
-    data: pokemonPage,
+    data: myPokemonPage,
     error,
-  } = useGetAllPokemonPage(itemsPerPage, currentPage);
+  } = useGetAllMyPokemon(itemsPerPage, currentPage);
 
   const [pokemonList, setPokemonList] = useState<PokemonData[]>([]);
 
   useEffect(() => {
-    setPokemonList(pokemonPage ?? []);
-  }, [pokemonPage]);
+    setPokemonList(myPokemonPage ?? []);
+  }, [myPokemonPage]);
 
   if (isLoading) {
     return <Loading />;
@@ -39,7 +39,7 @@ export default function PokemonList() {
       {pokemonList.map((pokemon, index) => (
         <PokemonCard
           key={index}
-          pokemonName={pokemon.name}
+          pokemonName={pokemon.nickname || ""}
           pokemonRealName={pokemon.name}
           pokemonImgUrl={getImageURL(pokemon.id)}
           pokemonId={pokemon.id}
@@ -59,4 +59,6 @@ export default function PokemonList() {
       </div>
     </div>
   );
-}
+};
+
+export default MyPokemonPage;

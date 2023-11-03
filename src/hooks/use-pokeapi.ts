@@ -10,7 +10,7 @@ export const useGetAllPokemonPage = (limit: number, offset: number) => {
     queryKey: ["allPokemonPage", limit, offset],
     queryFn: async () => {
       const { data } = await axios.get(
-        `${pokeapiUrl}/?limit=${limit}&offset=${offset}`
+        `${pokeapiUrl}?limit=${limit}&offset=${offset}`
       );
       return data.results.map((result: { name: String; url: String }) => ({
         ...result,

@@ -13,17 +13,19 @@ import Image from "next/image";
 
 type Props = {
   pokemonName: string;
+  pokemonRealName: string;
   pokemonImgUrl?: string;
   pokemonId: number;
 };
 
 export default function PokemonCard({
   pokemonName,
+  pokemonRealName,
   pokemonImgUrl,
   pokemonId,
 }: Props) {
   return (
-    <Link href={`/pokemon/${pokemonName}`}>
+    <Link href={`/pokemon/${pokemonRealName}`}>
       <Card>
         <CardHeader>
           <CardTitle>{capitalize(pokemonName)}</CardTitle>
