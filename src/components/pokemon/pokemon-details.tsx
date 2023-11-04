@@ -42,11 +42,22 @@ const PokemonDetails = ({ pokemonData, pokemonImageURL }: Props) => {
     setIsCatching(true);
 
     setTimeout(() => {
-      refetch().finally(() => {
-        setIsCatching(false);
-      });
-
-      !data ? setIsSuccessCatching(true) : setIsUnsuccessCatching(true);
+      refetch()
+        .then((res) => {
+          if (res.status === "error") {
+            setIsUnsuccessCatching(true);
+          } else {
+            setIsSuccessCatching(true);
+          }
+        })
+        .catch((err) => {
+          if (err) {
+            setIsUnsuccessCatching(true);
+          }
+        })
+        .finally(() => {
+          setIsCatching(false);
+        });
     }, 2000);
   };
 
