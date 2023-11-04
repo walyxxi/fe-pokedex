@@ -1,18 +1,19 @@
+import React, { Suspense, useState } from "react";
+
 import Loading from "@/components/loading";
 import { capitalize } from "@/lib/utils";
 import { PokemonData } from "@/types";
-import * as Dialog from "@radix-ui/react-dialog";
 import { AlertCircleIcon, Magnet } from "lucide-react";
 import Image from "next/image";
-import React, { Suspense, useState } from "react";
 import { Badge } from "../badge";
 import { Separator } from "../separator";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
-import { catchPokemon, postMyPokemon } from "@/hooks/use-api";
-import axios from "axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { catchPokemon, postMyPokemon } from "@/api/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import Dialog from "../dialog";
 
 type Props = {
   pokemonData: PokemonData;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 const PokemonDetails = ({ pokemonData, pokemonImageURL }: Props) => {
+  const route = useRouter();
   const queryClient = useQueryClient();
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -28,21 +30,23 @@ const PokemonDetails = ({ pokemonData, pokemonImageURL }: Props) => {
   const [isUnsuccessCatching, setIsUnsuccessCatching] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const { refetch, data } = useQuery({
+    queryKey: ["catchPokemon"],
+    queryFn: catchPokemon,
+    enabled: false,
+    retry: 0,
+  });
+
   const handleOnCatch = () => {
     setOpenDialog(true);
     setIsCatching(true);
 
-    setTimeout(async () => {
-      try {
-        await catchPokemon();
-        setIsSuccessCatching(true);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          setIsUnsuccessCatching(true);
-        }
-      } finally {
+    setTimeout(() => {
+      refetch().finally(() => {
         setIsCatching(false);
-      }
+      });
+
+      !data ? setIsSuccessCatching(true) : setIsUnsuccessCatching(true);
     }, 2000);
   };
 
@@ -55,6 +59,7 @@ const PokemonDetails = ({ pokemonData, pokemonImageURL }: Props) => {
     mutationFn: postMyPokemon,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["myPokemon"] });
+      route.push("/mypokemon");
     },
   });
 
@@ -65,6 +70,7 @@ const PokemonDetails = ({ pokemonData, pokemonImageURL }: Props) => {
 
     setTimeout(() => {
       createMyPokemon.mutate({
+        uid: pokemonData.uid,
         id: pokemonData.id,
         name: pokemonData.name,
         nickname: newNickname,
@@ -159,59 +165,56 @@ const PokemonDetails = ({ pokemonData, pokemonImageURL }: Props) => {
           </div>
         </CardContent>
       </Card>
-      <Dialog.Root open={openDialog}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="bg-white bg-opacity-60 data-[state=open]:animate-overlayShow fixed inset-0" />
-          <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] p-[25px] focus:outline-none">
-            {isCatching && (
-              <Loading text={`Catching ${capitalize(pokemonData.name)}`} />
-            )}
-            {isSuccessCatching && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex flex-col gap-1">
-                    <span>Gotcha, you got new Pokemon.</span>
-                    <span className="text-xs text-gray-400 font-normal">
-                      Rename your Pokemon and Save it as your collection!
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex gap-2">
-                  <Input
-                    placeholder="Pokemon Name"
-                    value={newNickname}
-                    onChange={handleOnChangeNickname}
-                  />
-                  <Button size={"sm"} onClick={handleOnSave}>
-                    Save
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-            {isUnsuccessCatching && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-normal flex items-center gap-2">
-                    <AlertCircleIcon className="text-yellow-500" />
-                    Opsss, you miss it,{" "}
-                    <span
-                      className="font-bold underline cursor-pointer text-yellow-700"
-                      onClick={handleOnCloseUnsuccess}
-                    >
-                      try again!
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-            )}
-            {isSaving && (
-              <Loading
-                text={`Save ${capitalize(pokemonData.name)} to My Collection`}
-              />
-            )}
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <Dialog isOpen={openDialog}>
+        <>
+          {isCatching && (
+            <Loading text={`Catching ${capitalize(pokemonData.name)}`} />
+          )}
+          {isSuccessCatching && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex flex-col gap-1">
+                  <span>Gotcha, you got new Pokemon.</span>
+                  <span className="text-xs text-gray-400 font-normal">
+                    Rename your Pokemon and Save it as your collection!
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex gap-2">
+                <Input
+                  placeholder="Pokemon Name"
+                  value={newNickname}
+                  onChange={handleOnChangeNickname}
+                />
+                <Button size={"sm"} onClick={handleOnSave}>
+                  Save
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+          {isUnsuccessCatching && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-normal flex items-center gap-2">
+                  <AlertCircleIcon className="text-yellow-500" />
+                  Opsss, you miss it,{" "}
+                  <span
+                    className="font-bold underline cursor-pointer text-yellow-700"
+                    onClick={handleOnCloseUnsuccess}
+                  >
+                    try again!
+                  </span>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          )}
+          {isSaving && (
+            <Loading
+              text={`Save ${capitalize(pokemonData.name)} to My Collection`}
+            />
+          )}
+        </>
+      </Dialog>
     </>
   );
 };

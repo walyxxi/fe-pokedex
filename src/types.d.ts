@@ -62,6 +62,7 @@ export interface PokemonType {
 }
 
 export interface PokemonData {
+  uid: number;
   id: number;
   name: string;
   nickname?: string;
@@ -71,4 +72,12 @@ export interface PokemonData {
   weight: number;
   height: number;
   species: species;
+}
+
+export interface MyPokemonData {
+  uid: number;
+  id: number;
+  name: string;
+  nickname: string;
+  count_update?: number;
 }
