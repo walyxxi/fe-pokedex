@@ -81,7 +81,7 @@ const PokemonDetails = ({ pokemonData, pokemonImageURL }: Props) => {
 
     setTimeout(() => {
       createMyPokemon.mutate({
-        uid: pokemonData.uid,
+        uid: pokemonData.uid || 0,
         id: pokemonData.id,
         name: pokemonData.name,
         nickname: newNickname,

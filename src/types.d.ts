@@ -62,7 +62,7 @@ export interface PokemonType {
 }
 
 export interface PokemonData {
-  uid: number;
+  uid?: number;
   id: number;
   name: string;
   nickname?: string;
